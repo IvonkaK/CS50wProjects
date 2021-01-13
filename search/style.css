@@ -6,6 +6,7 @@
 .navigation {
     float: right;
     font-family: arial, sans-serif;
+    margin: 8px;
 }
 
 #images, #advanced {
@@ -86,7 +87,9 @@ img {
 }
 
 /* image search page*/
-
+#images {
+    margin: 8px;
+}
 
 /*advanced search page*/
 .top {
@@ -99,6 +102,7 @@ img {
 #img {
     width: 10%;
     float: left;
+    margin: 8px;
 }
 
 #back {
@@ -108,6 +112,7 @@ img {
     text-decoration: none;
     line-height: 24px;
     vertical-align: middle;
+    margin: 8px;
 }
 
 .fields {
@@ -168,4 +173,9 @@ h4 {
     color: rgba(0, 0, 0, 0.87);
     font-weight: lighter;
     font-size: small;
+}
+
+body {
+    display: block;
+    margin: auto;
 }
