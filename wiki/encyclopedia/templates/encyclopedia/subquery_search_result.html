@@ -1,0 +1,16 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Subquery Search result
+{% endblock %}
+
+{% block body %}
+    <h1>All pages found based on your sub-search</h1>
+
+    <ul>
+        {% for entry in search_list %}
+           <li><a href="{% url "wiki" title=entry %}">{{ entry }}</a></li>
+        {% endfor %}
+    </ul>
+
+{% endblock %}
