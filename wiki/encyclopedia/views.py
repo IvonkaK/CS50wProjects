@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from . import util
 import random
@@ -7,8 +7,11 @@ import markdown2 as md
 
 def index(request):
     if request.method == "POST":
+        # get search query value
         query = request.POST['q']
+        # see if there is an entry based on the query(title)
         entry = util.get_entry(query)
+        # empty list initialised
         search_list = []
         if not entry:
             # get list of all existing entries
@@ -31,9 +34,8 @@ def index(request):
                 "search_list": search_list
             })
         else:
-            return render(request, "encyclopedia/entry.html", {
-                "entry": entry
-            })
+            # if query matches, redirect user to that entry page
+            return redirect("wiki", title=query)
     else:
         return render(request, "encyclopedia/index.html", {
             "entries": util.list_entries()
@@ -65,18 +67,11 @@ def create_new_page(request):
             return render(request, "encyclopedia/page_exist_error.html", {
                 "title": title
             })
-
         # otherwise save entry
-        save = util.save_entry(title, content)
+        util.save_entry(title, content)
 
-        # grab new entry
-        new_entry = util.get_entry(title)
-
-        # take user to the new page
-        return render(request, "encyclopedia/entry.html", {
-            "entry": new_entry,
-            "title": title
-        })
+        # redirect user to newly created page
+        return redirect('wiki', title=title)
     else:
         return render(request, "encyclopedia/new_page.html")
 
@@ -85,33 +80,21 @@ def random_page(request):
     # get entry list
     entries_list = util.list_entries()
     title = random.choice(entries_list)
-    content = util.get_entry(title)
 
-    # convert Markdown to HTML before loading
-    html = md.markdown(content)
-
-    return render(request, "encyclopedia/entry.html", {
-        "entry": html,
-        "title": title
-    })
+    # redirect user to random the entry page
+    return redirect('wiki', title=title)
 
 
 def edit_entry(request, title):
     if request.method == "POST":
-        title = request.POST['page_title']
         content = request.POST['page_text']
 
         # save the edited entry
         util.save_entry(title, content)
 
-        # convert Markdown to HTML before loading
-        html = md.markdown(content)
+        # redirect user back to the entry page
+        return redirect('wiki', title=title)
 
-        # take user back to the entry page
-        return render(request, "encyclopedia/entry.html", {
-            "entry": html,
-            "title": title
-        })
         # populate page on load with current entry data
     else:
         # find entry data based on the title
