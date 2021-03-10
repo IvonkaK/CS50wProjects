@@ -1,0 +1,23 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% load static %}
+    <h2>Watchlist</h2>
+    <div class="list-group">
+        {% for element in watchlist %}
+            <ul class="list-group list-group-horizontal-md">
+                <li class="list-group-item list-group-item-action"><a
+                        href="{% url "showListing" element.listing.id %}">{{ element.listing.title }}</a></li>
+                {# add to watchlist #}
+                <li class="list-group-item">
+                    <form action="{% url 'removeFromWatchlist' element.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Remove from watchlist</button>
+                    </form>
+                </li>
+            </ul>
+        {% empty %}
+            <p>Your watchlist is empty</p>
+        {% endfor %}
+        </div>
+{% endblock %}

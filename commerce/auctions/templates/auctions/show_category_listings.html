@@ -1,0 +1,25 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% load static %}
+    <h2>{{ category.title }}</h2>
+    <div class="row row-cols-1">
+        {% for listing in listings %}
+            <a href="{% url "showListing" listing.id %}" class="col mb-4 nav-link">
+                <div class="card flex-row flex-wrap">
+                    {% if listing.img_url %}
+                        <img src="{{ listing.img_url }}" class="card-img-top" style="max-width: 18rem; max-height: 20rem">
+                    {% else  %}
+                        <img src="{% static 'auctions/image-unavailable.jpg' %}" class="card-img-top" style="max-width: 18rem; max-height: 20rem">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ listing.title }}</h5>
+                        <p class="card-text">Price: $ {{ listing.bidding_start }}</p>
+                        <p class="card-text">{{ listing.description }}</p>
+                    </div>
+                </div>
+            </a>
+        {% empty %}
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -1,0 +1,219 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% load static %}
+    {# if user is logged in and the listing belong to logged in user perform below #}
+    {% if user.is_authenticated and user == listing.user %}
+
+        {# display success/error messages #}
+        {% if messages %}
+            {% for message in messages %}
+                <div{% if message.tags == 'error' %} class="{{ message.tags }} alert alert-danger"
+                                                     role="alert"
+                {% else %} class="{{ message.tags }} alert alert-success"
+                                                     role="alert"
+                {% endif %}>{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <p class="card-text"><b>The auction winner is: {{ auction_winner }} </b></p>
+        {# close listing #}
+        <form action="{% url 'closeListing' listing.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">Close this listing</button>
+        </form>
+        {# display listing info #}
+        <div class="card">
+            <h3 class="card-title">Listing: {{ listing.title }}</h3>
+            {% if listing.img_url %}
+                <img src="{{ listing.img_url }}" class="card-img-top" style="max-width: 18rem; max-height: 20rem">
+            {% else %}
+                <img src="{% static 'auctions/image-unavailable.jpg' %}" class="card-img-top"
+                     style="max-width: 18rem; max-height: 20rem">
+            {% endif %}
+            <div class="card-body">
+                <p class="card-text">{{ listing.description }}</p>
+                <p class="card-text">Starting price: ${{ listing.bidding_start }}</p>
+                <p class="card-text">Current highest bid: ${{ highest_bid }} by {{ current_winning_bidder }}</p>
+            </div>
+            <div class="card-body">
+                <h5 class="card-text">Details</h5>
+                <p class="card-text">Listed by: {{ listing.user }}</p>
+                <p class="card-text">Category: {{ listing.listing_category.title }}</p>
+
+                {#add comment to this listing #}
+                <form action="{% url 'addComment' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exampleFormControlTextarea1">Comment this listing</label>
+                        <textarea name="comment" type="text" class="form-control"
+                                  id="exampleFormControlTextarea1"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Comment</button>
+                </form>
+            </div>
+        </div>
+
+        {# show comments collapse section #}
+        <p>
+            <a class="btn btn-info" data-toggle="collapse" href="#collapseExample" role="button"
+               aria-expanded="false" aria-controls="collapseExample">
+                Show All Comments
+            </a>
+        </p>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                {# display all coments#}
+                {% for comment in comments %}
+                    <div class="card">
+                        <div class="card-header">
+                            {{ comment.user }} said:
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                {% endfor %}
+            </div>
+        </div>
+
+        {# if user is logged in and the listing DOES NOT belong to logged in user perform below #}
+    {% elif user.is_authenticated %}
+
+        {# display listing info #}
+        <div class="card">
+            <h3 class="card-title">Listing: {{ listing.title }}</h3>
+
+            {# display info if the signed in user won the auction #}
+            {% if user == auction_winner %}
+                <p class="alert alert-success"> Congrats, you've won this auction!</p>
+            {% endif %}
+
+            {# display success/error messages #}
+            {% if messages %}
+                {% for message in messages %}
+                    <div{% if message.tags == 'error' %} class="{{ message.tags }} alert alert-danger"
+                                                         role="alert"
+                    {% else %} class="{{ message.tags }} alert alert-success"
+                                                         role="alert"
+                    {% endif %}>{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {# add to watchlist #}
+            <form action="{% url 'addToWatchlist' listing.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">Add to watchlist</button>
+            </form>
+
+
+            {% if listing.img_url %}
+                <img src="{{ listing.img_url }}" class="card-img-top" style="max-width: 18rem; max-height: 20rem">
+            {% else %}
+                <img src="{% static 'auctions/image-unavailable.jpg' %}" class="card-img-top"
+                     style="max-width: 18rem; max-height: 20rem">
+            {% endif %}
+            <div class="card-body">
+                <p class="card-text">{{ listing.description }}</p>
+                <p class="card-text">Starting price: ${{ listing.bidding_start }}</p>
+                <p class="card-text">Current highest bid: ${{ highest_bid }}</p>
+                {# bidding #}
+                <form action="{% url 'addBidding' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exampleFormControlTextarea1">{{ total_bids }} bid(s) so far.</label>
+                        <input name="bid" type="number" class="form-control" id="exampleFormControlTextarea1"
+                               step="0.01" min="0" placeholder="Bid">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Place Bid</button>
+                </form>
+            </div>
+            <div class="card-body">
+                <h5 class="card-text">Details</h5>
+                <p class="card-text">Listed by: {{ listing.user }}</p>
+                <p class="card-text">Category: {{ listing.listing_category.title }}</p>
+
+                {# add comment to this listing #}
+                <form action="{% url 'addComment' listing.id %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="exampleFormControlTextarea1">Comment this listing</label>
+                        <textarea name="comment" type="text" class="form-control"
+                                  id="exampleFormControlTextarea1"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Comment</button>
+                </form>
+            </div>
+        </div>
+
+        {# show comments collapse section #}
+        <p>
+            <a class="btn btn-info" data-toggle="collapse" href="#collapseExample" role="button"
+               aria-expanded="false" aria-controls="collapseExample">
+                Show All Comments
+            </a>
+        </p>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                {# display all comments #}
+                {% for comment in comments %}
+                    <div class="card">
+                        <div class="card-header">
+                            {{ comment.user }} said:
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                {% endfor %}
+
+            </div>
+        </div>
+
+        {# if user is NOT logged in perform below #}
+    {% else %}
+
+        {# display listing info #}
+        <div class="card">
+            <h5 class="card-title">Listing: {{ listing.title }}</h5>
+            {% if listing.img_url %}
+                <img src="{{ listing.img_url }}" class="card-img-top" style="max-width: 18rem; max-height: 20rem">
+            {% else %}
+                <img src="{% static 'auctions/image-unavailable.jpg' %}" class="card-img-top"
+                     style="max-width: 18rem; max-height: 20rem">
+            {% endif %}
+            <div class="card-body">
+                <p class="card-text">{{ listing.description }}</p>
+                <p class="card-text">Starting price: ${{ listing.bidding_start }}</p>
+                <p class="card-text">Current highest bid: ${{ highest_bid }}</p>
+            </div>
+        </div>
+
+        {# show comments collapse section #}
+        <p>
+            <a class="btn btn-info" data-toggle="collapse" href="#collapseExample" role="button"
+               aria-expanded="false" aria-controls="collapseExample">
+                Show All Comments
+            </a>
+        </p>
+        <div class="collapse" id="collapseExample">
+            <div class="card card-body">
+                {# display all comments #}
+                {% for comment in comments %}
+                    <div class="card">
+                        <div class="card-header">
+                            {{ comment.user }} said:
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                {% endfor %}
+
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
